@@ -1,0 +1,25 @@
+[run]
+source = main
+
+omit =
+    test.py
+    */tests/*
+    */venv/*
+    */__pycache__/*
+    */.pytest_cache/*
+    */node_modules/*
+    .coveragerc
+    .dockerignore
+    .gitignore
+    Dockerfile
+    requirements.txt
+    README.md
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if __name__ == __main__:
+    if TYPE_CHECKING
+
+[xml]
+output = coverage.xml
