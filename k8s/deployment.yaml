@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: item-service
+  namespace: item-service-ns
+  labels:
+    app: item-service
+spec:
+  replicas: 2
+  # The strategy and progressDeadlineSeconds is redundant because that is the default deployment behaviour in K8s
+  # Just stating it to show it can be tweaked to prefered ranges.
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  progressDeadlineSeconds: 600
+  selector:
+    matchLabels:
+      app: item-service
+  template:
+    metadata:
+      labels:
+        app: item-service
+    spec:
+      automountServiceAccountToken: false #This is if you do not want your app to communicate directly with kubernetes API, this is for security, for webapps, backend services and database usecases.
+      restartPolicy: Always #This is also redundant as it is the default behaviour of k8s unless stated otherwise
+      containers:
+        - name: item-service
+          image: localhost/item-service:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            # Load non-sensitive configurations from ConfigMap
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: item-service-config
+                  key: APP_ENV
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: item-service-config
+                  key: LOG_LEVEL
+            # Load sensitive configurations from Secret
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: item-service-secrets
+                  key: DATABASE_URL
+          securityContext:
+            # Run the container as the non-root 'appuser' (UID 1000 from Dockerfile)
+            runAsNonRoot: true
+            runAsUser: 1000
+            # Optional: Make the root filesystem read-only for enhanced security
+            # If the app writes logs or temporary files to the container's filesystem
+            # readOnlyRootFilesystem: true
+          livenessProbe:
+            httpGet:
+              path: /health # the health check endpoint
+              port: 8000
+            initialDelaySeconds: 15 # Give the app time to start
+            periodSeconds: 20 # Check every 20 seconds
+            timeoutSeconds: 5 # Timeout after 5 seconds
+            failureThreshold: 3 # After 3 failures, restart the container
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5 # App should be ready sooner than live
+            periodSeconds: 10 # Check every 10 seconds
+            timeoutSeconds: 3 # Timeout after 3 seconds
+            failureThreshold: 2 # After 2 failures, remove from service endpoints
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "128Mi"

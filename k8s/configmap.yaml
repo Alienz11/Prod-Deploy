@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: item-service-config
+  namespace: item-service-ns
+  labels:
+    app: item-service
+data:
+  LOG_LEVEL: "INFO"
+  APP_ENV: "production"

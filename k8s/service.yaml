@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: item-service
+  namespace: item-service-ns
+  labels:
+    app: item-service
+spec:
+  selector:
+    app: item-service
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+      name: http
+  type: ClusterIP

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
+data:
+  # For example creating a role in AWS that would be assigned to a group of users
+  mapRoles: |-
+    - rolearn: arn:aws:iam::123456789:role/dev-viewer
+      username: dev-viewer
+      groups:
+        - dev-viewer-group

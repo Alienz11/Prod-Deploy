@@ -1,0 +1,30 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: dev
+  name: pod-reader
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pod-reader-binding
+  namespace: dev
+subjects:
+  - kind: Group
+    name: dev-viewer-group
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+  # This is off script but incase you want the binding per user a different role would have to be created
+  # Then the binding would look like the below
+
+# subjects:
+#   - kind: User
+#     name: dev-viewer
+#     apiGroup: rbac.authorization.k8s.io
