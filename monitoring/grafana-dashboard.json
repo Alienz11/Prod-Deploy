@@ -1,0 +1,73 @@
+{
+    "annotations": {
+        "list": [{
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+        }]  
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 1,
+    "id": null,
+    "links": [],
+    "panels": [
+    {
+        "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+        },
+        "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 0
+        },
+        "id": 2,
+        "title": "FastAPI Item Service - CPU Usage",
+        "type": "timeseries",
+        "targets": [{
+            "expr": "sum(rate(container_cpu_usage_seconds_total{container=\"fastapi-item-service\", namespace=\"fastapi-item-service-ns\"}[5m])) by (pod)",
+            "refId": "A"
+        }]
+    },
+    {
+        "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+        },
+        "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 0
+        },
+        "id": 3,
+        "title": "FastAPI Item Service - Memory Usage",
+        "type": "timeseries",
+        "targets": [{
+            "expr": "sum(container_memory_usage_bytes{container=\"fastapi-item-service\", namespace=\"fastapi-item-service-ns\"}) by (pod)",
+            "refId": "A"
+        }]
+    }
+    ],
+    "schemaVersion": 37,
+    "style": "dark",
+    "tags": ["fastapi", "kubernetes", "application"],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "FastAPI Item Service Overview",
+    "uid": "fastapi-item-service-dashboard",
+    "version": 1
+}

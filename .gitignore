@@ -194,3 +194,4 @@ cython_debug/
 .cursorindexingignore
 
 .flake8
+package.txt

@@ -1,0 +1,49 @@
+# monitoring/alerts.yml
+# Basic alerting rules for the API application and Kubernetes cluster
+groups:
+  - name: application-alerts
+    rules:
+      - alert: APIHighCPULoad
+        expr: sum(rate(container_cpu_usage_seconds_total{container="item-service", namespace="item-service-ns"}[5m])) by (pod) / sum(kube_pod_container_resource_limits{namespace="item-service-ns", resource="cpu", container="item-service"}) by (pod) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          env: production
+        annotations:
+          summary: "API pod {{ $labels.pod }} CPU usage is high"
+          description: "API pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been using >80% CPU for 5 minutes."
+      - alert: APIHighMemoryUsage
+        expr: sum(container_memory_usage_bytes{container="item-service", namespace="item-service-ns"}) by (pod) / sum(kube_pod_container_resource_limits{namespace="item-service-ns", resource="memory", container="item-service"}) by (pod) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          env: production
+        annotations:
+          summary: "API pod {{ $labels.pod }} memory usage is high"
+          description: "API pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been using >70% memory for 5 minutes."
+      - alert: APIPodCrashLooping
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="item-service", namespace="item-service-ns"}[15m])) by (pod) > 3
+        for: 5m
+        labels:
+          severity: critical
+          env: production
+        annotations:
+          summary: "API pod {{ $labels.pod }} is crashlooping"
+          description: "API pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has restarted more than 3 times in the last 15 minutes."
+      - alert: APILowReplicaCount
+        expr: kube_deployment_spec_replicas{deployment="item-service-deployment", namespace="item-service-ns"} != kube_deployment_status_replicas_available{deployment="item-service-deployment", namespace="item-service-ns"}
+        for: 1m
+        labels:
+          severity: critical
+          env: production
+        annotations:
+          summary: "API deployment has insufficient replicas"
+          description: "Deployment {{ $labels.deployment }} in namespace {{ $labels.namespace }} has only {{ $value }} available replicas, less than the desired count of {{ $labels.expected_replicas }}."
+  - alert: APIHighErrorRate
+    expr: sum(rate(your_app_http_requests_total{status_code=~"5..", service="item-service"}[5m])) by (service) / sum(rate(your_app_http_requests_total{service="item-service"}[5m])) by (service) * 100 > 5
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "API application {{ $labels.service }} has high error rate"
+      description: "The error rate for {{ $labels.service }} is above 5%."

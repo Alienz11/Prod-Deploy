@@ -1,0 +1,52 @@
+global:
+  scrape_interval: 15s # Default scrape interval
+  evaluation_interval: 15s # How often to evaluate rules
+rule_files:
+  - "/etc/prometheus/rules/alerts.yml" # Path to Alerts.yml inside the Prometheus container
+scrape_configs:
+  # Kubernetes Service Discovery for Node Exporter (if deployed)
+  - job_name: 'kubernetes-nodes'
+    kubernetes_sd_configs:
+      - role: node
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '(.*):10250' # If node exporter runs on 10250, adjust if different
+        target_label: __address__
+        replacement: '${1}:9100' # Assuming node_exporter listens on 9100
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __metrics_path__
+        replacement: /metrics
+  # Kubernetes Service Discovery for kube-state-metrics (if deployed)
+  - job_name: 'kube-state-metrics'
+    kubernetes_sd_configs:
+      - role: service
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+        regex: kube-state-metrics # Match the service label
+        action: keep
+      - source_labels: [__meta_kubernetes_service_port_metrics] # Assumes 'metrics' port
+        action: drop # This drops the 'metrics' label from service discovery
+      - source_labels: [__meta_kubernetes_service_address]
+        target_label: __address__ # Use service IP as target
+        regex: (.+)
+        replacement: ${1}:8080 # kube-state-metrics default port
+      - target_label: __metrics_path__
+        replacement: /metrics
+  - job_name: 'item-service'
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ["item-service-ns"] # Scrape pods in App's namespace
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        regex: item-service # Match App's label
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        target_label: __address__
+        regex: (.+)
+        replacement: $1
