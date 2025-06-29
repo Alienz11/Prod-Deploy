@@ -45,7 +45,7 @@ This would create the `terraform.tfstate` file in the s3 bucket and configure st
 
 ### Create Deployment Files
 
-- Copy the remaining files from the [terraform](./) to the new terraform directory.
+- Copy the remaining files from the [terraform](./) folder to the new terraform directory.
 - Check if the terraform files are properly formatted:
 
     ```bash
@@ -72,7 +72,7 @@ This would create the `terraform.tfstate` file in the s3 bucket and configure st
 
 ## RECOMMENDATIONS
 
-- You can use terraform modules to get default template for each Cloud Provider resource (i.e seperate modules for VPC, EKS, EC2 e.t.c).
+- You can use terraform modules to get default template for each Cloud Provider resource (i.e. separate modules for VPC, EKS, EC2 e.t.c).
 - You can use GitOps for deployment, when a PR to the main branch runs `terraform plan` for the Lead Engineer to review updates on the terraform files, and a push (i.e a PR merge) to the main branch, would run `terraform apply`.
 
 ⚠️ **`NOTE`** ⚠️ : These files are archive deployments I made in the past. Since it was an optional task I did not test it out. The configurations should work, but there might be slight configurations issues that may arise, depending on versions disparity. Please review logs and re-configure to suit your environment.

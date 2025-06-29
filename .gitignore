@@ -195,3 +195,5 @@ cython_debug/
 
 .flake8
 package.txt
+.vscode
+.vscode/*

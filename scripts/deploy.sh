@@ -12,17 +12,17 @@ NAMESPACE="item-service-ns"
 K8S_MANIFESTS_DIR="../k8s" # Relative path to your k8s manifests
 
 # --- Functions ---
-build_and_push_image() {
-    echo "Building Docker image: ${ECR}/${IMAGE_NAME}:${APP_VERSION}"
+# build_and_push_image() {
+#     echo "Building Docker image: ${ECR}/${IMAGE_NAME}:${APP_VERSION}"
 
-    # Login to ECR (This only work if an IAM user is registered on the AWS CLI where this script runs)
-    aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-    docker build -t "${ECR}/${IMAGE_NAME}:${APP_VERSION}" -f ../Dockerfile ..
+#     # Login to ECR (This only work if an IAM user is registered on the AWS CLI where this script runs)
+#     aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+#     docker build -t "${ECR}/${IMAGE_NAME}:${APP_VERSION}" -f ../Dockerfile ..
 
-    echo "Pushing Docker image: ${ECR}/${IMAGE_NAME}:${APP_VERSION}"
-    docker push "${ECR}/${IMAGE_NAME}:${APP_VERSION}"
-    echo "Docker image pushed successfully."
-}
+#     echo "Pushing Docker image: ${ECR}/${IMAGE_NAME}:${APP_VERSION}"
+#     docker push "${ECR}/${IMAGE_NAME}:${APP_VERSION}"
+#     echo "Docker image pushed successfully."
+# }
 
 apply_k8s_manifests() {
     echo "Applying Kubernetes manifests to namespace: ${NAMESPACE}"
@@ -57,7 +57,7 @@ wait_for_deployment() {
 # --- Main Script Execution ---
 echo "Starting deployment process for ${IMAGE_NAME}:${APP_VERSION}..."
 
-build_and_push_image
+# build_and_push_image
 apply_k8s_manifests
 wait_for_deployment
 
