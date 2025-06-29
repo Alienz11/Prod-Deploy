@@ -6,12 +6,15 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     permissions:
       id-token: write # Required for OIDC
       contents: read
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       # --- OWASP Dependency Check (Comprehensive) ---
       - name: OWASP Dependency Check
         id: owasp_check
@@ -23,6 +26,7 @@ jobs:
           format: 'ALL' # Generates ALL formats
           out: './owasp-reports'
           args: '--enableRetired --enableExperimental --failOnCVSS 7.0'
+
       # --- Upload OWASP Reports as Artifacts ---
       - name: Upload OWASP Reports
         if: always()
@@ -31,29 +35,35 @@ jobs:
           name: owasp-dependency-html-report
           path: ./owasp-reports/dependency-check-report.html
           retention-days: 7
+
       # Set up Python
       - name: Set up Python 3.12
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
           cache: 'pip'
+
       # This holds all necessary dependencies to run tests and lints
       - name: Install Python dependencies
         run: |
           pip install -r dev-requirements.txt
+
       # --- Code Quality Checks ---
       - name: Lint with Flake8
         continue-on-error: true
         run: |
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
       - name: Check formatting with Black
         continue-on-error: true
         run: |
           black --check .
+
       # --- Run Tests ---
       - name: Run Pytest
         continue-on-error: true
-        run: pytest tests/ --tb=short --cov=. --cov-report=term --cov-report=xml --cov-config=.coveragerc
+        run: pytest test.py/ --tb=short --cov=. --cov-report=term --cov-report=xml --cov-config=.coveragerc
+
       # # --- Run Sonarqube Analysis ---
       # - name: Run Sonarqube Scan
       #   id: sonar_scan
@@ -84,6 +94,7 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build -t item-service .
+
       # Trivy scan, to scan image for vulnerabilities
       - name: Run Trivy vulnerability scanner
         continue-on-error: true
@@ -95,6 +106,7 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+
       # # Log Into ECR
       # - name: Log in to Amazon ECR
       #   uses: aws-actions/amazon-ecr-login@v1
@@ -109,45 +121,45 @@ jobs:
           echo "tag=${TAG}"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
-# # Tag Docker Images
-# - name: Tag Docker image
-#   run: |
-#     docker tag item-service ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/item-service:latest
-#     docker tag item-service ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/item-service:${{ steps.generate_tag.outputs.tag }}
+      # # Tag Docker Images
+      # - name: Tag Docker image
+      #   run: |
+      #     docker tag item-service ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/item-service:latest
+      #     docker tag item-service ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/item-service:${{ steps.generate_tag.outputs.tag }}
 
-# # Push Image to ECR
-# - name: Push Docker image to ECR
-#   run: |
-#     docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/item-service:latest
-#     docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/item-service:${{ steps.generate_tag.outputs.tag }}
+      # # Push Image to ECR
+      # - name: Push Docker image to ECR
+      #   run: |
+      #     docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/item-service:latest
+      #     docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/item-service:${{ steps.generate_tag.outputs.tag }}
 
-# # Install Kubectl (Optional, If Kubectl is not installed on your EKS)
-# - name: Install kubectl
-#   uses: aws-actions/setup-kubectl@v3
-#   with:
-#     version: 'latest'
+      # # Install Kubectl (Optional, If Kubectl is not installed on your EKS)
+      # - name: Install kubectl
+      #   uses: aws-actions/setup-kubectl@v3
+      #   with:
+      #     version: 'latest'
 
-# # Set Up Kube Config to connect to EKS Cluster
-# - name: Update kube config
-#   run: |
-#     aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
+      # # Set Up Kube Config to connect to EKS Cluster
+      # - name: Update kube config
+      #   run: |
+      #     aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
 
-# # Update Image Tag on Deploment file
-# - name: Update Image Tag on Deploment file
-#   env:
-#     DOCKER_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/item-service
-#   run: |
-#     sed -i.bak "s|${DOCKER_IMAGE}:.*|${DOCKER_IMAGE}:${{ steps.generate_tag.outputs.tag }}|g" k8s/deployment.yaml
+      # # Update Image Tag on Deploment file
+      # - name: Update Image Tag on Deploment file
+      #   env:
+      #     DOCKER_IMAGE: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/item-service
+      #   run: |
+      #     sed -i.bak "s|${DOCKER_IMAGE}:.*|${DOCKER_IMAGE}:${{ steps.generate_tag.outputs.tag }}|g" k8s/deployment.yaml
 
-# # Deploy To EKS
-# - name: Deploy To EKS
-#   id: deploy_eks
-#   run: |
-#     ./scripts/deploy.sh
+      # # Deploy To EKS
+      # - name: Deploy To EKS
+      #   id: deploy_eks
+      #   run: |
+      #     ./scripts/deploy.sh
 
-# # Rollback Deployment
-# - name: Rollback on failure
-#   if: steps.deploy_eks.outcome == 'failure'
-#   run: |
-#     echo "Rollout failed, rolling back..."
-#     ./scripts/rollback.sh
+      # # Rollback Deployment
+      # - name: Rollback on failure
+      #   if: steps.deploy_eks.outcome == 'failure'
+      #   run: |
+      #     echo "Rollout failed, rolling back..."
+      #     ./scripts/rollback.sh
