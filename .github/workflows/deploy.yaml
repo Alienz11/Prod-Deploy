@@ -95,27 +95,36 @@ jobs:
         run: |
           docker build -t item-service .
 
-      # Run Trivy to generate HTML report
-      - name: Run Trivy and generate HTML report
+      ## This works just wanted to try out sarif 😊😊
+      # # Run Trivy to generate HTML report
+      # - name: Run Trivy and generate HTML report
+      #   continue-on-error: true
+      #   uses: aquasecurity/trivy-action@0.28.0
+      #   with:
+      #     image-ref: 'item-service'
+      #     format: 'table'
+      #     output: 'trivy-report.html'
+      #     vuln-type: 'os,library'
+      #     severity: 'CRITICAL,HIGH'
+      #     ignore-unfixed: true
+      #     exit-code: '1'  # Optional: Fail on critical/high if needed
+
+      - name: Run Trivy and generate SARIF report
         continue-on-error: true
         uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: 'item-service'
-          format: 'html'
-          output: 'trivy-report.html'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
-          exit-code: '1'  # Optional: Fail on critical/high if needed
+          exit-code: '1'
       
-      # Upload HTML report as GitHub Actions artifact
-      - name: Upload Trivy HTML Report
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Upload SARIF to GitHub
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          name: trivy-html-report
-          path: trivy-report.html
-          retention-days: 7
+          sarif_file: trivy-results.sarif
 
       # # Log Into ECR
       # - name: Log in to Amazon ECR
