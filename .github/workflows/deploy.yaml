@@ -95,17 +95,27 @@ jobs:
         run: |
           docker build -t item-service .
 
-      # Trivy scan, to scan image for vulnerabilities
-      - name: Run Trivy vulnerability scanner
+      # Run Trivy to generate HTML report
+      - name: Run Trivy and generate HTML report
         continue-on-error: true
         uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: 'item-service'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
+          format: 'html'
+          output: 'trivy-report.html'
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+          exit-code: '1'  # Optional: Fail on critical/high if needed
+      
+      # Upload HTML report as GitHub Actions artifact
+      - name: Upload Trivy HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-html-report
+          path: trivy-report.html
+          retention-days: 7
 
       # # Log Into ECR
       # - name: Log in to Amazon ECR
