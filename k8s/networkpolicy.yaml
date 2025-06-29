@@ -2,6 +2,9 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: item-service-network-policy
+  namespace: item-service-ns
+  labels:
+    app: item-service
 spec:
   podSelector:
     matchLabels:
@@ -11,25 +14,25 @@ spec:
     - Egress
   ingress:
     - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
         - podSelector:
             matchLabels:
-              app: nginx-ingress-controller
+              app.kubernetes.io/component: controller
+              app.kubernetes.io/name: ingress-nginx
       ports:
         - protocol: TCP
           port: 8000
-          #Example
-          # - namespaceSelector:
-          #     matchLabels:
-          #       kubernetes.io/metadata.name: kube-system
   egress:
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0
-          ports:
-            - protocol: TCP
-              port: 53
-            - protocol: UDP
-              port: 53
+      ports:
+        - protocol: TCP
+          port: 53
+        - protocol: UDP
+          port: 53
 
 # Example: Allow egress only to other pods in the same namespace with specific labels
 # - to:

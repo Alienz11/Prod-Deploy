@@ -2,26 +2,30 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: item-service-ingress
+  namespace: item-service-ns
+  labels:
+    app: item-service
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/ssl-redirect: "true" # Enforce HTTPS
-    # Security Headers
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      more_set_headers "X-Frame-Options: SAMEORIGIN";
-      more_set_headers "X-Content-Type-Options: nosniff";
-      more_set_headers "X-XSS-Protection: 1; mode=block";
-      more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
-      more_set_headers "X-Robots-Tag: none,nofollow,noarchive,nosnippet,notranslate,noimageindex";
-      more_set_headers "Permissions-Policy: fullscreen=(), geolocation=(), microphone=()";
-      more_set_headers "Server: ";
-    # If using cert-manager for automatic TLS certificates:
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true" # Enforce HTTPS
+    # # Security Headers
+    # nginx.ingress.kubernetes.io/configuration-snippet: |
+    #   more_set_headers "X-Frame-Options: SAMEORIGIN";
+    #   more_set_headers "X-Content-Type-Options: nosniff";
+    #   more_set_headers "X-XSS-Protection: 1; mode=block";
+    #   more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
+    #   more_set_headers "X-Robots-Tag: none,nofollow,noarchive,nosnippet,notranslate,noimageindex";
+    #   more_set_headers "Permissions-Policy: fullscreen=(), geolocation=(), microphone=()";
+    #   more_set_headers "Server: ";
+    # # If using cert-manager for automatic TLS certificates:
     # cert-manager.io/cluster-issuer: "letsencrypt-prod" # Reference the ClusterIssuer
 spec:
-  # Optional: Define TLS certificates (If there is an already created SSL certificate by any DNS vendor)
+  # # Optional: Define TLS certificates (If there is an already created SSL certificate by any DNS vendor)
   # tls:
   # - hosts:
   #   - item-api.example.com # Replace with actual domain
   #   secretName: item-api-tls-secret # K8s Secret containing TLS certificate OR Create automatically with CertIssuer
+  ingressClassName: nginx
   rules:
     - host: item-api.example.com
       http:

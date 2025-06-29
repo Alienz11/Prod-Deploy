@@ -43,7 +43,7 @@ This folder contains utility scripts to automate deployment, health checking, an
 
 ## THOUGHTS
 
-I am not sure if the above files are relevant asides maybe `deploy.sh`, because the entire concept of automation is event driven (Say a push to the main branch on GitHub). And most of what is in the `deploy.sh` file would be handled on the GitHub pipeline, well maybe just declare it as a `step` on the GitHub pipeline, but it's not neccessarily Ideal.
+I am not sure if the above files are relevant asides maybe `deploy.sh`, because the entire concept of automation is event driven (Say a push to the main branch on GitHub). And most of what is in the `deploy.sh` file would be handled on the GitHub pipeline, well maybe just declare it as a `step` on the GitHub pipeline, but it's not neccessarily Idle, as one would like to seperate steps from building docker images, to pushing the image to a container registry to deploying the manifest files. Also, what happens when there are updates to the deployment?, the script would become redundant.
 
 I think using a tool like `FluxCD` or more prefferably `ArgoCD` would have better ease and more concept of automation to it. Because all you need to do is point ArgoCD to a repo holding the Kubernetes manifests and it makes sure what is on the repo is what is deployed on the cluster. And if you need to update, just run script on the pipeline using `grep` command to find the image name and `sed` command to replace the image with the latest image tag. ArgoCD would notice the change in the repo and automatically carry out a rollout deployment. You can also create Helm Chart of the app and point ArgoCD to the Helm Repo and then the same logic applies upon new updates.
 

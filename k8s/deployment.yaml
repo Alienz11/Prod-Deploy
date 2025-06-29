@@ -25,9 +25,11 @@ spec:
     spec:
       automountServiceAccountToken: false #This is if you do not want your app to communicate directly with kubernetes API, this is for security, for webapps, backend services and database usecases.
       restartPolicy: Always #This is also redundant as it is the default behaviour of k8s unless stated otherwise
+      terminationGracePeriodSeconds: 60 # Give the pod up to 60 seconds to shut down
       containers:
         - name: item-service
-          image: localhost/item-service:1.0.0
+          image: localhost/item-service:1.0.0 # for local deployment with kind
+          #image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/item-service:1.0.0 # Sample ECR based image
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
@@ -47,15 +49,24 @@ spec:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: item-service-secrets
+                  name: item-service-secret
                   key: DATABASE_URL
           securityContext:
             # Run the container as the non-root 'appuser' (UID 1000 from Dockerfile)
             runAsNonRoot: true
             runAsUser: 1000
-            # Optional: Make the root filesystem read-only for enhanced security
-            # If the app writes logs or temporary files to the container's filesystem
-            # readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false #prevents gaining root priviledge
+            # Removes all special Linux powers from the container ((e.g., CAP_NET_ADMIN, CAP_SYS_PTRACE). Dropping them means:
+            # No ability to do low-level network changes. No access to raw sockets. No mounting filesystems, etc.)
+            capabilities:
+              drop:
+                - ALL
+            # Prevent container from calling syscalls that can be used for exploits, and allows only container runtime(ContainerD or CRI-O) to do so
+            seccompProfile:
+              type: RuntimeDefault
+              # Optional: Make the root filesystem read-only for enhanced security
+              # If the app writes logs or temporary files to the container's filesystem
+              # readOnlyRootFilesystem: true
           livenessProbe:
             httpGet:
               path: /health # the health check endpoint

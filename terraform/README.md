@@ -3,7 +3,7 @@
 This repository provisions a complete AWS EKS infrastructure using Terraform. It includes:
 
 - S3 remote backend for Terraform state
-- VPC and networking (subnets, IGW, route tables)
+- VPC and networking (Subnets, IGW, Route Tables)
 - EKS Cluster with managed node groups
 - Security groups and IAM roles
 
@@ -11,11 +11,11 @@ This repository provisions a complete AWS EKS infrastructure using Terraform. It
 
 ### Create Terraform Backend (S3 + DynamoDB)
 
-#### Prerequisites Before terraform init (Manual Steps):
+#### Prerequisites Before Terraform Init (Manual Steps)
 
-- **Download And Install The Neccessary Tools**:
+- **Download And Install The Necessary Tools**:
 
-  You need certain commandline tools installed on your local machine before starting anything. They include
+  You need certain command line tools installed on your local machine before starting anything. They include
   - **`AWS CLI`**
   - **`Terraform`** >= version 1.0.0
   - **`IAM credentials with admin-level AWS access`** (For Access Key ID and Access Secret Key, for AWS CLI auth)
@@ -35,18 +35,18 @@ This repository provisions a complete AWS EKS infrastructure using Terraform. It
   - Primary Key: A single primary partition key named LockID of type String.
   - Provisioned Capacity: Set to a low value (e.g., 1 Read/Write capacity unit each) as it's for locking, not high throughput.
 
-After creating the above resources copy the [versios.tf](versions.tf) into a new terraform directory/folder. And run:
+After creating the above resources copy the [versions.tf](versions.tf) into a new terraform directory/folder. And run:
 
 ```bash
 terraform init
 ```
 
-This would create the `terraform.tfstate` file in the s3 bucket and configure state-locking in the dynamoDB
+This would create the `terraform.tfstate` file in the s3 bucket and configure state-locking in the DynamoDB
 
 ### Create Deployment Files
 
 - Copy the remaining files from the [terraform](./) to the new terraform directory.
-- Check if the terraform files are properly fommated:
+- Check if the terraform files are properly formatted:
 
     ```bash
     terraform fmt
@@ -64,7 +64,7 @@ This would create the `terraform.tfstate` file in the s3 bucket and configure st
     terraform apply
     ```
 
-- After the deployment, a command would be displayed, this is to run and configure the EKS CLuster on your local kubeconfig, to have direct access to the EKS from your local machine. It should look like this:
+- After the deployment, a command would be displayed, this is to run and configure the EKS Cluster on your local kubeconfig, to have direct access to the EKS from your local machine. It should look like this:
 
     ```txt
     aws eks update-kubeconfig --name item-server-cluster --region us-east-1
@@ -74,5 +74,7 @@ This would create the `terraform.tfstate` file in the s3 bucket and configure st
 
 - You can use terraform modules to get default template for each Cloud Provider resource (i.e seperate modules for VPC, EKS, EC2 e.t.c).
 - You can use GitOps for deployment, when a PR to the main branch runs `terraform plan` for the Lead Engineer to review updates on the terraform files, and a push (i.e a PR merge) to the main branch, would run `terraform apply`.
+
+⚠️ **`NOTE`** ⚠️ : These files are archive deployments I made in the past. Since it was an optional task I did not test it out. The configurations should work, but there might be slight configurations issues that may arise, depending on versions disparity. Please review logs and re-configure to suit your environment.
 
 Cheers.

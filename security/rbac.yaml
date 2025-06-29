@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: item-service
+  namespace: item-service-ns
   name: item-service-role
 rules:
   - apiGroups: [""]
@@ -12,11 +12,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: item-service-binding
-  namespace: item-service
+  namespace: item-service-ns
 subjects:
   - kind: ServiceAccount
     name: item-service-sa
-    namespace: item-service
+    namespace: item-service-ns
 roleRef:
   kind: Role
   name: item-service-role
