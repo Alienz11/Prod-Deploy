@@ -10,6 +10,7 @@ jobs:
     permissions:
       id-token: write # Required for OIDC
       contents: read
+      security-events: write
 
     steps:
       - name: Checkout code
