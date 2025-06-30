@@ -7,8 +7,8 @@ metadata:
     app: item-service
 spec:
   replicas: 2
-  # The strategy and progressDeadlineSeconds is redundant because that is the default deployment behaviour in K8s
-  # Just stating it to show it can be tweaked to prefered ranges.
+  ## The strategy and progressDeadlineSeconds is redundant because that is the default deployment behaviour in K8s
+  ## Just stating it to show it can be tweaked to prefered ranges.
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -34,7 +34,7 @@ spec:
           ports:
             - containerPort: 8000
           env:
-            # Load non-sensitive configurations from ConfigMap
+            # #Load non-sensitive configurations from ConfigMap
             - name: APP_ENV
               valueFrom:
                 configMapKeyRef:
@@ -45,27 +45,27 @@ spec:
                 configMapKeyRef:
                   name: item-service-config
                   key: LOG_LEVEL
-            # Load sensitive configurations from Secret
+            # # Load sensitive configurations from Secret
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: item-service-secret
                   key: DATABASE_URL
           securityContext:
-            # Run the container as the non-root 'appuser' (UID 1000 from Dockerfile)
+            ## Run the container as the non-root 'appuser' (UID 1000 from Dockerfile)
             runAsNonRoot: true
             runAsUser: 1000
             allowPrivilegeEscalation: false #prevents gaining root priviledge
-            # Removes all special Linux powers from the container ((e.g., CAP_NET_ADMIN, CAP_SYS_PTRACE). Dropping them means:
-            # No ability to do low-level network changes. No access to raw sockets. No mounting filesystems, etc.)
+            # #Removes all special Linux powers from the container ((e.g., CAP_NET_ADMIN, CAP_SYS_PTRACE). Dropping them means:
+            # #No ability to do low-level network changes. No access to raw sockets. No mounting filesystems, etc.)
             capabilities:
               drop:
                 - ALL
-            # Prevent container from calling syscalls that can be used for exploits, and allows only container runtime(ContainerD or CRI-O) to do so
+            # #Prevent container from calling syscalls that can be used for exploits, and allows only container runtime(ContainerD or CRI-O) to do so
             seccompProfile:
               type: RuntimeDefault
-              # Optional: Make the root filesystem read-only for enhanced security
-              # If the app writes logs or temporary files to the container's filesystem
+              # #Optional: Make the root filesystem read-only for enhanced security
+              # #If the app writes logs or temporary files to the container's filesystem
               # readOnlyRootFilesystem: true
           livenessProbe:
             httpGet:

@@ -8,14 +8,9 @@ INGRESS_HOST="api-item-server.user.com" #  Application's external URL
 # --- Functions ---
 check_app_health_endpoint() {
     echo "Checking application health endpoint via Ingress URL..."
-    # On Kind, one can use the NodePort and localhost/node IP
-    # e.g., CURL_URL="https://127.0.0.1:30443/health"
-    # Ensure your /etc/hosts mapping is correct if using hostname locally
 
     CURL_URL="https://${INGRESS_HOST}/health"
 
-    # For local Kind setup, if NodePort is used and you have host mapping, you might need:
-    # CURL_URL="https://${INGRESS_HOST}:30443/health" # Adjust 30443 to your websecure NodePort
     for i in {1..5}; do 
         RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "${CURL_URL}")
 

@@ -2,7 +2,7 @@
 
 set -euo pipefail # Exit on error, unset variables, pipeline errors
 
-# --- Configuration ---
+# #--- Configuration ---
 AWS_REGION=us-east-1
 AWS_ACCOUNT_ID=91542516212 #This is a random number not a real account ID
 ECR="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
@@ -11,7 +11,7 @@ APP_VERSION="1.0.0" # Or dynamically generate this (e.g. from git commit hash, o
 NAMESPACE="item-service-ns"
 K8S_MANIFESTS_DIR="../k8s" # Relative path to your k8s manifests
 
-# --- Functions ---
+# #--- Functions ---
 # build_and_push_image() {
 #     echo "Building Docker image: ${ECR}/${IMAGE_NAME}:${APP_VERSION}"
 

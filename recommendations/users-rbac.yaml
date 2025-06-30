@@ -21,8 +21,11 @@ roleRef:
   kind: Role
   name: pod-reader
   apiGroup: rbac.authorization.k8s.io
-  # This is off script but incase you want the binding per user a different role would have to be created
-  # Then the binding would look like the below
+---
+
+
+# This is off script but incase you want the binding per user a different role would have to be created
+# Then the binding would look like the below
 
 # subjects:
 #   - kind: User
